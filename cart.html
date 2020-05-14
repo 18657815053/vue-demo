@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style type="text/css">
+  .center {
+    text-align: center;
+  }
+
+  .cart {
+    margin: 0 auto;
+    width: 300px;
+    text-align: left;
+  }
+
+  .cart-title {
+    text-align: center;
+    background-color: red;
+  }
+
+  .cart-list {
+    text-align: left;
+  }
+
+  .cart-list ul {
+    padding-left: 10px;
+  }
+
+  .cart-list li {
+    height: 30px;
+    list-style-type: none;
+  }
+
+  .cart-list input {
+    width: 50px;
+  }
+
+  .cart-total {
+    height: 25px;
+    text-align: center;
+    background-color: seagreen;
+  }
+
+  .left {
+    float: left;
+  }
+
+  .right {
+    float: right;
+  }
+</style>
+
+<body>
+
+  <div id="app">
+    <div class="center">
+      <cart></cart>
+    </div>
+  </div>
+
+  <script src="js/vue.js"></script>
+
+  <script>
+    var cartTitle = {
+      props: ['title'],
+      template: `<div class="cart-title">{{title}}</div>`
+    };
+    var cartList = {
+      props: ['list'],
+      template: `
+        <div class="cart-list">
+          <ul>
+            <li v-for='(item,key) in list'>
+              <div class="left">{{item.name}}</div>
+              <div class="right">
+                <button @click='reduce(key)' :disabled='item.num < 2'>-</button> 
+                <input type="text" v-model='item.num'> 
+                <button @click='increase(key)'>+</button>
+                <button>删除</button>
+              </div>
+            </li>
+          </ul>
+        </div>`,
+
+      methods: {
+        increase: function (key) {
+          this.list[key].num++;
+        },
+        reduce: function (key) {
+          this.list[key].num--;
+        }
+      }
+    };
+    var cartTotal = {
+      props: ['list'],
+      template: `
+        <div class="cart-total">
+          <div class="left">总价:{{total}} </div>
+          <div class="right"><button>结算</button></div>
+        </div>`,
+      computed: {
+        total: function () {
+          var money = 0;
+          this.list.forEach(element => {
+            money += element.num * element.price;
+          });
+          return money;
+        }
+      }
+    };
+
+    Vue.component('cart', {
+      data: function () {
+        return {
+          title: '我的购物车',
+          list: [{
+            id: 1,
+            name: 'MacBook',
+            price: 12345,
+            num: 1
+          }, {
+            id: 2,
+            name: '雷神911SE',
+            price: 6000,
+            num: 1
+          }, {
+            id: 3,
+            name: '联想笔记本',
+            price: 6789,
+            num: 1
+          }, {
+            id: 4,
+            name: '其他',
+            price: 7000,
+            num: 2
+          },]
+        }
+      },
+      template: `
+        <div class="cart">
+          <cart-title :title='title'></cart-title>
+          <cart-list :list='list'></cart-list>
+          <cart-total :list='list'></cart-total>
+        </div>`,
+      components: {
+        'cart-title': cartTitle,
+        'cart-list': cartList,
+        'cart-total': cartTotal,
+      }
+    })
+
+    var wm = new Vue({
+      el: "#app",
+      data: {
+
+      }
+    })
+  </script>
+</body>
+
+</html>

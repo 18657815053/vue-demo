@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style type="text/css">
+    .v-table {
+      border: 1px solid #000000;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    .v-table th {
+      border: 1px solid #000000;
+    }
+
+    .v-table td {
+      border: 1px solid #000000;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <script src="jquery/jquery.min.js"></script> -->
+  <script src="js/vue.js"></script>
+  <div id="app">
+    编号:<input type="text" v-model.lazy="bookCode" :disabled="isEdit"><br>
+    名称:<input type="text" v-model="bookName"><br>
+    <input type="submit" value="保存" @click="save" :disabled="saveDisabled">
+    <table class="v-table">
+      <col width="50px">
+      <col width="100px">
+      <col width="300px">
+      <col width="100px">
+      <tr>
+        <th>序号</th>
+        <th>编号</th>
+        <th>名称</th>
+        <th>操作</th>
+      </tr>
+      <tr v-for="(item,index) in books">
+        <td>{{ index + 1 }}</td>
+        <td>{{ item.id }}</td>
+        <td>{{ item.name }}</td>
+        <td>
+          <a href="#" @click="edit(index)">修改</a>
+          <a href="#" @click="del(index)">删除</a>
+        </td>
+      </tr>
+      <tr>
+        <th>统计</th>
+        <th></th>
+        <th>{{ getSum }}</th>
+        <th></th>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    var vn = new Vue({
+      el: '#app',
+      data: {
+        bookCode: '',
+        bookName: '',
+        isEdit: false,
+        saveDisabled: false,
+        books: [
+          {
+            id: '01',
+            name: '水浒传',
+          },
+          {
+            id: '02',
+            name: '红楼梦',
+          },
+          {
+            id: '03',
+            name: '西游记',
+          },
+          {
+            id: '04',
+            name: '三国演义',
+          },
+        ]
+      },
+      methods: {
+        save: function () {
+          if (this.bookCode == '' || this.bookName == '') {
+            alert('不能为空')
+            return false;
+          }
+          if (this.isEdit) {
+            this.books.some((item) => {
+              if (item.id == this.bookCode) {
+                item.name = this.bookName;
+                this.isEdit = false;
+                return true;
+              }
+            })
+          }
+          else {
+            this.books.push({ id: this.bookCode, name: this.bookName });
+          }
+          this.bookCode = '';
+          this.bookName = '';
+        },
+        edit: function (index) {
+          this.isEdit = true;
+          this.bookCode = this.books[index].id;
+          this.bookName = this.books[index].name;
+        },
+        del: function (index) {
+          this.books.splice(index, 1);
+        }
+      },
+      computed: {
+        getSum: function () {
+          return this.books.length;
+        }
+      },
+      watch: {
+        bookCode: function (newValue, oldValue) {
+          this.saveDisabled = this.books.some((item) => {
+            return this.bookCode == item.id;
+          })
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+    增加:<input type="number" v-model.lazy="addCount">
+    減少:<input type="number" v-model.lazy="delCount">
+    <component-a :add-count="parseInt(addCount)" :del-count="parseInt(delCount)" @enlarge-text="handle($event)">
+    </component-a>
+    <div :style='{fontSize: mainMsgFontSize + "px"}'>{{mainMsg}}</div>
+    <br><br>
+    兄弟组件传值:<br>
+    <component-tom></component-tom>
+    <component-jarry></component-jarry>
+  </div>
+</body>
+<script src="js/vue.js"></script>
+<script>
+  //提供事件中心,用于兄弟组件传值
+  var eventHub = new Vue();
+
+  Vue.component('component-a', {
+    data: function () {
+      return {
+        count: 0,
+        textCount: 1,
+      }
+    },
+    template: `
+        <div>
+            <div>
+                <div>{{count}}</div>
+                <button @click="msgAdd()">递增</button>
+                <button @click="msgDel()">递减</button>
+            </div>
+            <div>
+                <div><input type="number" v-model="textCount"></div>
+                <button @click="$emit('enlarge-text',textCount)">改变字体大小</button>
+            </div>
+        </div>
+        `,
+    props: {
+      addCount: Number,
+      delCount: Number,
+    },
+    methods: {
+      msgAdd: function () {
+        this.count += this.addCount;
+      },
+      msgDel: function () {
+        this.count -= this.delCount;
+      }
+    }
+  })
+
+  Vue.component('component-tom', {
+    data: function () {
+      return {
+        count: 0,
+      }
+    },
+    template: `
+            <div>
+                <div>Tom:{{ count }}</div>
+                <div><button @click="handle">点击</button></div>
+            </div>
+        `,
+    methods: {
+      handle: function () {
+        //触发兄弟组件的事件
+        eventHub.$emit('jarry-event', 1);
+      }
+    },
+    mounted: function () {
+      eventHub.$on('tom-event', (val) => {
+        this.count += val;
+      })
+    }
+  });
+
+  Vue.component('component-jarry', {
+    data: function () {
+      return {
+        count: 0,
+      }
+    },
+    template: `
+            <div>
+                <div>Jarry:{{ count }}</div>
+                <div><button @click="handle">点击</button></div>
+            </div>
+        `,
+    methods: {
+      handle: function () {
+        //触发兄弟组件的事件
+        eventHub.$emit('tom-event', 2);
+      }
+    },
+    mounted: function () {
+      eventHub.$on('jarry-event', (val) => {
+        this.count += val;
+      })
+    }
+  });
+
+  var wm = new Vue({
+    el: "#app",
+    data: {
+      addCount: 1,
+      delCount: 1,
+      mainMsg: '测试字体大小',
+      mainMsgFontSize: 10,
+    },
+    methods: {
+      handle: function (val) {
+        val = parseInt(val);
+        this.mainMsgFontSize += val;
+      }
+    }
+  })
+
+
+</script>
+
+</html>
